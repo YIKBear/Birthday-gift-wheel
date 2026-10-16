@@ -1,0 +1,1859 @@
+
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+
+  <link rel="icon" type="image/png" href="image/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>生日禮物命運轉盤</title>
+
+  
+<style>
+  /* ===== 1. 全站基礎設定 ===== */
+  * {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --cream: #fff8ef;
+    --white: #fffdfb;
+    --pink: #e89ab0;
+    --pink-dark: #c96f8d;
+    --pink-light: #fff0f4;
+    --yellow: #fff0b9;
+    --blue: #ddebf9;
+    --green: #dcebd8;
+    --text: #66515a;
+    --muted: #97818b;
+    --border: #f1dce3;
+    --shadow: 0 5px 16px #b98b9a18;
+  }
+
+  body {
+    margin: 0;
+    padding: 30px 16px;
+    font-family: Arial, "Microsoft JhengHei", sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  main {
+    max-width: 850px;
+    margin: auto;
+  }
+
+  /* ===== 2. 標題與文字 ===== */
+  h1 {
+    color: var(--pink-dark);
+    text-align: center;
+    font-size: clamp(26px, 5vw, 36px);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    margin-top: 32px;
+    color: var(--pink-dark);
+    font-size: 22px;
+  }
+
+  .intro {
+    text-align: center;
+    color: var(--muted);
+    font-size: clamp(8px, 10vw, 20px);
+    margin: 8px 0;
+  }
+
+  .note {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ===== 3. 商品卡片 ===== */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(210px, 1fr)
+    );
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+  }
+
+  .card img {
+    display: block;
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #fff8f5;
+    border-radius: 14px;
+  }
+
+  .card h3 {
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .price {
+    color: var(--pink-dark);
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .card a {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--pink-dark);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--pink);
+  }
+
+  .card a:hover {
+    color: #a94f70;
+  }
+
+  /* ===== 4. 轉盤區域 ===== */
+  .wheel-section {
+    margin-bottom: 30px;
+    padding: 24px 16px;
+    text-align: center;
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(100%, 400px);
+    margin: 20px auto;
+    padding: 8px;
+    background: #fff5f7;
+    border: 3px solid #f3d6e0;
+    border-radius: 50%;
+  }
+
+  /* 轉盤與左右 GIF 的排列 */
+.wheel-with-gifs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* 左右 GIF */
+.side-gif {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  pointer-events: none;
+}
+
+.side-gif img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 抽獎時顯示 */
+.side-gif.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 轉盤區塊保持置中 */
+.wheel-with-gifs .wheel-wrap {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 20px auto;
+}
+
+/* 螢幕較窄時，避免 GIF 擠壓轉盤 */
+@media (max-width: 900px) {
+  .wheel-with-gifs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wheel-with-gifs .wheel-wrap {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    max-width: 400px;
+  }
+
+  .side-gif img {
+    max-width: 140px;
+  }
+}
+
+  #wheel {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .pointer {
+    position: absolute;
+    z-index: 2;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 30px solid var(--pink-dark);
+    filter: drop-shadow(0 2px 1px #b98b9a30);
+  }
+
+  /* ===== 5. 抽獎按鈕 ===== */
+  #spinButton {
+    padding: 13px 30px;
+    border: 2px solid #f4c7d4;
+    border-radius: 999px;
+    background: var(--pink);
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #d47e99;
+    transition:
+      transform 0.15s ease, background-color 0.15s ease;
+  }
+
+  #spinButton:hover:not(:disabled) {
+    background: var(--pink-dark);
+    transform: translateY(-2px);
+  }
+
+  #spinButton:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #d47e99;
+  }
+
+  #spinButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  #result {
+    margin-top: 20px;
+    color: var(--pink-dark);
+    font-size: 19px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+  }
+
+  /* ===== 6. 抽獎件數選擇 ===== */
+  .draw-settings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .draw-settings label {
+    font-weight: bold;
+  }
+
+  .draw-settings select {
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* ===== 7. 已抽中禮物清單 ===== */
+  .picked-section {
+    margin-top: 28px;
+    padding: 20px;
+    border: 2px dashed #efc4d2;
+    border-radius: 22px;
+    background: var(--pink-light);
+    text-align: left;
+  }
+
+  .picked-section h2 {
+    margin-top: 0;
+    color: var(--pink-dark);
+  }
+
+  .picked-card {
+    margin: 10px 0;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--white);
+    box-shadow: 0 3px 10px #b98b9a10;
+  }
+
+  .picked-card h3 {
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+
+  .picked-price {
+    color: var(--pink-dark);
+    font-weight: bold;
+  }
+
+  .picked-empty {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ===== 8. 手機版微調 ===== */
+  @media (max-width: 480px) {
+    body {
+      padding: 20px 12px;
+    }
+
+    .wheel-section {
+      padding: 20px 12px;
+    }
+
+    .picked-section {
+      padding: 16px;
+    }
+
+    .products {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      padding: 10px;
+      border-radius: 16px;
+    }
+
+    .card img {
+      height: 130px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+    }
+
+    .price {
+      font-size: 17px;
+    }
+  }
+  /* 吉伊卡哇主題標題插圖 */
+.site-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.header-illustration {
+  display: block;
+  width: 180px;
+  max-width: 65%;
+  height: auto;
+  margin: 0 auto 12px;
+  object-fit: contain;
+}
+
+/* 標題顏色 */
+.site-header h1 {
+  color: #c96f8d;
+  margin-bottom: 10px;
+}
+
+/* 日文副標題 */
+.site-header .intro {
+  margin-top: 0;
+  color: #97818b;
+  line-height: 1.8;
+}
+
+/* 標題旁的小圖示 */
+.title-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+
+.csv-import {
+  margin: 20px auto;
+  padding: 16px;
+  max-width: 500px;
+  text-align: center;
+  background: #fff0f4;
+  border: 1px solid #f1dce3;
+  border-radius: 16px;
+}
+
+.csv-import label {
+  display: block;
+  margin-bottom: 10px;
+  color: #c96f8d;
+  font-weight: bold;
+}
+
+.csv-import input {
+  max-width: 100%;
+}
+
+#csvStatus {
+  margin: 10px 0 0;
+  color: #97818b;
+  font-size: 14px;
+}
+
+
+/* ===== 抽選角色與大獎動畫 ===== */
+
+.celebration-stage {
+  position: relative;
+  width: 100%;
+  min-height: 150px;
+  margin: 16px auto;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.character-companion {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  transition: transform 0.3s ease;
+}
+
+.companion-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  animation: character-idle 1.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.character-message {
+  margin-top: 6px;
+  padding: 6px 14px;
+  border-radius: 18px;
+  background: #fff5f8;
+  color: #b75f7d;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+@keyframes character-idle {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-9px) rotate(4deg); }
+}
+
+/* 轉盤旋轉時：角色更緊張 */
+.character-companion.is-spinning .companion-image {
+  animation: character-nervous 0.18s linear infinite;
+}
+
+@keyframes character-nervous {
+  0%, 100% { transform: translateX(-3px) rotate(-6deg); }
+  50% { transform: translateX(3px) rotate(6deg); }
+}
+
+/* 抽中一般商品：開心跳一下 */
+.character-companion.is-happy .companion-image {
+  animation: character-happy 0.65s ease-in-out 2;
+}
+
+@keyframes character-happy {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-22px) scale(1.08); }
+  60% { transform: translateY(0) scale(0.95); }
+}
+
+/* 大獎特效覆蓋層 */
+.grand-prize-effect {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  border-radius: 20px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 250, 211, 0.98),
+    rgba(255, 196, 83, 0.94),
+    rgba(255, 237, 179, 0.92)
+  );
+}
+
+.grand-prize-effect.is-active {
+  display: flex;
+  animation: grand-prize-entrance 0.6s ease-out both;
+}
+
+@keyframes grand-prize-entrance {
+  0% { opacity: 0; transform: scale(0.75); }
+  70% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.golden-flash {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255,255,255,0.55) 0deg 8deg,
+    transparent 8deg 22deg
+  );
+  animation: golden-rays 8s linear infinite;
+}
+
+@keyframes golden-rays {
+  to { transform: rotate(360deg); }
+}
+
+.grand-prize-title {
+  position: relative;
+  z-index: 2;
+  color: #8b5200;
+  font-size: clamp(24px, 5vw, 38px);
+  font-weight: 900;
+  text-shadow: 0 2px 0 #fff4bc;
+  animation: prize-bounce 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes prize-bounce {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+.grand-prize-details {
+  position: relative;
+  z-index: 2;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.88);
+  color: #8b5200;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.confetti-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -18px;
+  width: 9px;
+  height: 15px;
+  border-radius: 2px;
+  animation: confetti-fall 2.8s linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(260px) rotate(720deg); opacity: 0; }
+}
+
+/* 手機版稍微縮小角色 */
+@media (max-width: 600px) {
+  .celebration-stage { min-height: 125px; }
+  .character-companion { min-height: 120px; }
+  .companion-image { width: 82px; height: 82px; }
+}
+
+/* 尊重使用者的減少動態效果設定 */
+@media (prefers-reduced-motion: reduce) {
+  .companion-image,
+  .grand-prize-title,
+  .golden-flash {
+    animation-duration: 2s;
+  }
+}
+
+/* 已抽中禮物區的標題與圖片 */
+.picked-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.picked-header h2 {
+  margin: 0;
+}
+
+.picked-header-image {
+  display: block;
+  width: 100px;
+  max-width: 25%;
+  height: auto;
+  object-fit: contain;
+}
+
+.end-gif {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 5px auto;
+}
+
+.end-gif img {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+
+  /* ===== 9. 視覺精修：吉伊卡哇柔和手帳風 ===== */
+  :root {
+    --cream: #fff9f2;
+    --white: #fffefd;
+    --pink: #efa9bd;
+    --pink-dark: #bd6685;
+    --pink-light: #fff1f5;
+    --yellow: #fff1c7;
+    --blue: #e7f0fb;
+    --green: #e3f0df;
+    --text: #5f4b52;
+    --muted: #9b858e;
+    --border: #f0dbe2;
+    --shadow: 0 10px 28px rgba(143, 91, 111, 0.09);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    padding: clamp(20px, 4vw, 48px) 16px;
+    background:
+      radial-gradient(circle at 8% 7%, rgba(255, 224, 232, 0.68), transparent 22rem),
+      radial-gradient(circle at 94% 18%, rgba(255, 239, 190, 0.46), transparent 20rem),
+      var(--cream);
+    color: var(--text);
+    font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+  }
+
+  main {
+    max-width: 980px;
+  }
+
+  .site-header {
+    margin-bottom: 34px;
+    padding: 8px 12px 20px;
+  }
+
+  .header-illustration {
+    width: clamp(140px, 24vw, 205px);
+    filter: drop-shadow(0 8px 10px rgba(177, 111, 132, 0.10));
+  }
+
+  .site-header h1 {
+    margin-top: 6px;
+    font-size: clamp(25px, 4.5vw, 38px);
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    text-wrap: balance;
+  }
+
+  .title-icon {
+    width: clamp(30px, 5vw, 42px);
+  }
+
+  .site-header .intro {
+    display: inline-block;
+    margin: 8px auto 0;
+    padding: 5px 16px;
+    border: 1px solid #f1dce3;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    font-size: clamp(13px, 2.2vw, 16px);
+    letter-spacing: 0.08em;
+  }
+
+  h2 {
+    font-size: clamp(19px, 3vw, 23px);
+    letter-spacing: 0.02em;
+  }
+
+  .csv-import,
+  .wheel-section,
+  .picked-section {
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+  }
+
+  .csv-import {
+    max-width: 620px;
+    margin: 18px auto;
+    padding: clamp(18px, 3vw, 26px);
+    background: rgba(255, 253, 251, 0.92);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .csv-import h2 {
+    margin: 0 0 16px;
+    text-align: center;
+  }
+
+  .csv-import label {
+    margin: 13px 0 6px;
+    color: var(--text);
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .csv-import input[type="text"],
+  .csv-import input[type="number"],
+  .csv-import input[type="url"],
+  .csv-import input[type="file"] {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #ead5dd;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .csv-import input:focus-visible,
+  .draw-settings select:focus-visible,
+  button:focus-visible,
+  a:focus-visible {
+    outline: 3px solid rgba(201, 111, 141, 0.25);
+    outline-offset: 2px;
+  }
+
+  .csv-import input:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 4px rgba(239, 169, 189, 0.16);
+  }
+
+  #csvStatus,
+  #addProductStatus {
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: #fff6f8;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  #addProductButton,
+  #resetButton {
+    min-height: 44px;
+    margin: 10px 6px 0 0;
+    padding: 11px 20px;
+    border: 1px solid #e9bdcb;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--pink-dark);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #f0d8e0;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  #addProductButton {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    background: var(--pink);
+    color: #fff;
+    border-color: #e9a0b6;
+    box-shadow: 0 4px 0 #d98da5;
+  }
+
+  #addProductButton:hover,
+  #resetButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #e5c5d0;
+  }
+
+  #addProductButton:hover {
+    background: var(--pink-dark);
+    box-shadow: 0 4px 0 #a95573;
+  }
+
+  #resetButton {
+    background: #fffdf7;
+    border-color: #ead9b0;
+    color: #8a7441;
+    box-shadow: 0 4px 0 #e8dfc6;
+  }
+
+  .wheel-section {
+    margin-top: 28px;
+    padding: clamp(20px, 4vw, 34px);
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 36%, rgba(255, 242, 246, 0.85), transparent 19rem),
+      rgba(255, 254, 253, 0.96);
+  }
+
+  .wheel-section > h2 {
+    margin-top: 0;
+    margin-bottom: 6px;
+  }
+
+  .wheel-section > p:not(#result) {
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .wheel-wrap {
+    padding: 9px;
+    background: linear-gradient(145deg, #fff5f8, #fffdf8);
+    border: 4px solid #f2d7e0;
+    box-shadow:
+      0 0 0 7px rgba(255, 255, 255, 0.8),
+      0 12px 28px rgba(169, 100, 124, 0.12);
+  }
+
+  .pointer {
+    border-top-color: var(--pink-dark);
+    filter: drop-shadow(0 3px 2px rgba(117, 62, 82, 0.16));
+  }
+
+  #spinButton {
+    min-width: 170px;
+    min-height: 50px;
+    margin: 8px 6px;
+    padding: 13px 28px;
+    border: 1px solid #d985a0;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #f2b4c6, #e99ab3);
+    box-shadow: 0 5px 0 #d17f9a, 0 8px 16px rgba(201, 111, 141, 0.16);
+    letter-spacing: 0.04em;
+  }
+
+  #spinButton:hover:not(:disabled) {
+    background: linear-gradient(180deg, #e99ab3, #d77f9c);
+    box-shadow: 0 5px 0 #bd6d89, 0 10px 18px rgba(201, 111, 141, 0.2);
+  }
+
+  #result {
+    display: inline-block;
+    max-width: 100%;
+    margin: 18px auto 8px;
+    padding: 10px 18px;
+    border: 1px dashed #e8b6c6;
+    border-radius: 16px;
+    background: #fff7f9;
+    line-height: 1.6;
+  }
+
+  .draw-settings {
+    margin: 18px 0 6px;
+  }
+
+  .draw-settings select {
+    min-height: 42px;
+    border: 1px solid #ead5dd;
+    box-shadow: 0 2px 6px rgba(143, 91, 111, 0.04);
+  }
+
+  .picked-section {
+    margin-top: 28px;
+    padding: clamp(18px, 3vw, 26px);
+    border: 1px solid #efcbd6;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255, 232, 239, 0.7), transparent 15rem),
+      #fff5f7;
+  }
+
+  .picked-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 15px 17px;
+    border: 1px solid #f0dce3;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(143, 91, 111, 0.06);
+  }
+
+  .picked-card h3,
+  .picked-card p {
+    overflow-wrap: anywhere;
+  }
+
+  .picked-card p {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .products {
+    gap: 18px;
+    margin-top: 18px;
+  }
+
+  .card {
+    overflow: hidden;
+    padding: 12px;
+    border: 1px solid #f0dce3;
+    border-radius: 22px;
+    box-shadow: 0 6px 20px rgba(143, 91, 111, 0.07);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: #e9bdcb;
+    box-shadow: 0 12px 26px rgba(143, 91, 111, 0.12);
+  }
+
+  .card img {
+    height: 190px;
+    padding: 8px;
+    background: linear-gradient(145deg, #fff7f8, #fffaf0);
+    border-radius: 15px;
+  }
+
+  .card h3 {
+    margin: 13px 2px 6px;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .price {
+    margin: 5px 2px;
+    font-size: 19px;
+    letter-spacing: 0.01em;
+  }
+
+  .card a {
+    margin: 8px 2px 3px;
+    padding-bottom: 2px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  #total {
+    display: inline-block;
+    margin: 0;
+    padding: 6px 13px;
+    border: 1px solid #e8dccc;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .note {
+    margin-top: 34px;
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  .end-gif {
+    margin-top: 14px;
+  }
+
+  .end-gif img {
+    width: 190px;
+    filter: drop-shadow(0 5px 8px rgba(143, 91, 111, 0.08));
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 20px 12px 30px;
+    }
+
+    .site-header {
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+    }
+
+    .wheel-section {
+      padding: 20px 12px;
+    }
+
+    .wheel-with-gifs {
+      gap: 6px;
+    }
+
+    .side-gif img {
+      max-width: 100px;
+    }
+
+    .wheel-wrap {
+      padding: 5px;
+      border-width: 3px;
+    }
+
+    .products {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      padding: 9px;
+      border-radius: 17px;
+    }
+
+    .card img {
+      height: 125px;
+    }
+
+    .card h3 {
+      font-size: 14px;
+    }
+
+    .price {
+      font-size: 16px;
+    }
+
+    .picked-card {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+    }
+
+    #spinButton,
+    #resetButton {
+      width: min(100%, 280px);
+      margin: 8px auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+</style>
+
+</head>
+
+<body>
+  <main>
+    <header class="site-header">
+      <img
+        class="header-illustration"
+        src="image/Usagigift.png"
+        alt="生日禮物主題插圖"
+      >
+
+      <h1>
+        <img
+          src="image/Usagi.png"
+          alt="吉伊卡哇"
+        class="title-icon"
+        > 生日禮物之命運轉盤
+      </h1>
+
+      <p class="intro">
+        ヤァァァァ ァアッハ
+      </p>
+
+
+    <section class="csv-import">
+      <label for="csvFile">📜 匯入願望清單 ➜</label>
+       <input
+       type="file"
+       id="csvFile"
+       accept=".csv,text/csv"
+      >
+      <p id="csvStatus">請選擇商品 CSV 檔案</p>
+    </section>
+
+
+<section class="csv-import">
+  <h2>🎁 匯入禮物</h2>
+
+  <label for="productName">商品名稱</label>
+  <input
+    type="text"
+    id="productName"
+    placeholder="例如：吉伊卡哇娃娃"
+  >
+
+  <label for="productPrice">商品價格（NT$）</label>
+  <input
+    type="number"
+    id="productPrice"
+    min="0"
+    step="1"
+    placeholder="例如：650"
+  >
+
+  <label for="productUrl">商品網址（選填）</label>
+  <input
+    type="url"
+    id="productUrl"
+    placeholder="貼上商品網址"
+  >
+
+  <label for="productImage">商品圖片</label>
+  <input
+    type="file"
+    id="productImage"
+    accept="image/*"
+  >
+
+  <button type="button" id="addProductButton">
+    加入轉盤
+  </button>
+
+  <p id="addProductStatus" role="status">
+    填寫商品資訊並選擇圖片，即可加入轉盤。
+  </p>
+</section>
+
+    <section class="wheel-section">
+     <h2>🎡 命運轉盤</h2>
+     <p>イーッヤッハァァァァ！！！</p>
+
+     <div class="wheel-with-gifs">
+       <div class="side-gif side-gif-left" id="leftGif">
+        <img src="image/usagispinhand.gif" alt="左側抽獎動畫">
+       </div>
+
+       <div class="wheel-wrap">
+         <div class="pointer"></div>
+         <canvas id="wheel" width="500" height="500"></canvas>
+       </div>
+
+       <div class="side-gif side-gif-right" id="rightGif">
+         <img src="image/usagispinhand.gif" alt="右側抽獎動畫">
+       </div>
+     </div>
+
+     <!-- 新增：角色與大獎動畫 -->
+     <div id="celebrationStage" class="celebration-stage">
+     <div id="characterCompanion" class="character-companion">
+    <img
+      src="image/UsagiThink.png"
+      alt="陪伴抽選的角色"
+      class="companion-image"
+    />
+    <div class="character-message" id="characterMessage">
+      會抽中什麼呢？
+    </div>
+  </div>
+
+  <div id="grandPrizeEffect" class="grand-prize-effect">
+    <div class="golden-flash"></div>
+    <div class="grand-prize-title">✨ 你哥花大錢！ ✨</div>
+    <div id="grandPrizeDetails" class="grand-prize-details"></div>
+    <div id="confettiLayer" class="confetti-layer"></div>
+  </div>
+     </div>
+
+    
+<button id="spinButton" type="button">開始抽獎</button>
+
+<button id="resetButton" type="button">
+  ↩ 回到初始值
+</button>
+
+<p id="result">等待命運揭曉……</p>
+
+     
+<div class="draw-settings">
+  <label for="drawCount">想抽出幾件禮物？</label>
+  <select id="drawCount">
+    <option value="2" selected>2 件</option>
+    <option value="3">3 件</option>
+    <option value="4">4 件</option>
+    <option value="5">5 件</option>
+  </select>
+</div>
+
+<section class="picked-section">
+  <div class="picked-header">
+    <h2>🎁 已抽中的禮物</h2>
+
+    <img
+      src="image/momoga.png"
+      alt="已抽中禮物插圖"
+      class="picked-header-image"
+    >
+  </div>
+  <p id="pickedCount">目前抽中 0 件</p>
+  <div id="pickedList"></div>
+  <p id="pickedTotal">累計金額：NT$0</p>
+</section>
+
+    </section>
+
+    <h2>🎀 候選禮物清單</h2>
+    <p id="total">正在計算商品數量……</p>
+
+    <section id="productList" class="products"></section>
+
+    <p class="note">
+      ΘωΘ 翊凱牌生日轉盤 翊凱版權 翊凱的 ΘωΘ
+    </p>
+    <div class="end-gif">
+      <img src="image/momogapoint.gif" alt="頁尾動畫">
+    </div>
+  </main>
+
+  <script>
+    // 匯入真實商品
+    let products = [];
+
+document
+  .getElementById("addProductButton")
+  .addEventListener("click", async () => {
+    const nameInput = document.getElementById("productName");
+    const priceInput = document.getElementById("productPrice");
+    const urlInput = document.getElementById("productUrl");
+    const imageInput = document.getElementById("productImage");
+    const status = document.getElementById("addProductStatus");
+
+    const name = nameInput.value.trim();
+    const price = Number(priceInput.value);
+    const url = urlInput.value.trim();
+    const imageFile = imageInput.files[0];
+
+    if (!name) {
+      status.textContent = "請填寫商品名稱。";
+      return;
+    }
+
+    if (
+      priceInput.value.trim() === "" ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+      status.textContent = "請填寫正確的商品價格。";
+      return;
+    }
+
+    if (!imageFile || !imageFile.type.startsWith("image/")) {
+      status.textContent = "請選擇一張商品圖片。";
+      return;
+    }
+
+    // 避免過大的圖片影響瀏覽器效能
+    if (imageFile.size > 5 * 1024 * 1024) {
+      status.textContent = "圖片請小於 5 MB。";
+      return;
+    }
+
+    try {
+      // 將圖片轉成可供網頁顯示的 Data URL
+      const image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(
+          new Error("圖片讀取失敗，請重新選擇。")
+        );
+
+        reader.readAsDataURL(imageFile);
+      });
+
+      products.push({
+        id: Date.now() + Math.random(),
+        name,
+        price,
+        image,
+        url: url || "#"
+      });
+
+      renderProducts();
+      drawWheel();
+      updateDrawStatus();
+
+      nameInput.value = "";
+      priceInput.value = "";
+      urlInput.value = "";
+      imageInput.value = "";
+
+      status.textContent = `已成功加入「${name}」！`;
+    } catch (error) {
+      status.textContent = error.message || "新增商品失敗。";
+    }
+  });
+
+    function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let field = "";
+    let quoted = false;
+
+    text = text.replace(/^\uFEFF/, "");
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+
+    if (char === '"') {
+      if (quoted && text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === "," && !quoted) {
+      row.push(field.trim());
+      field = "";
+    } else if (
+      (char === "\n" || char === "\r") && !quoted
+    ) {
+      if (char === "\r" && text[i + 1] === "\n") i++;
+      row.push(field.trim());
+
+      if (row.some(value => value !== "")) {
+        rows.push(row);
+      }
+
+      row = [];
+      field = "";
+    } else {
+      field += char;
+    }
+  }
+
+  row.push(field.trim());
+  if (row.some(value => value !== "")) rows.push(row);
+
+  if (rows.length < 2) {
+    throw new Error("CSV 沒有商品資料");
+  }
+
+  const headers = rows[0].map(h => h.toLowerCase());
+  const required = ["id", "name", "price", "image", "url"];
+
+  for (const key of required) {
+    if (!headers.includes(key)) {
+      throw new Error("缺少必要欄位：" + key);
+    }
+  }
+
+  return rows.slice(1).map(row => {
+    const item = {};
+    headers.forEach((key, i) => {
+      item[key] = row[i] ?? "";
+    });
+
+    return {
+      id: Number(item.id),
+      name: item.name,
+      price: Number(item.price),
+      image: item.image,
+      url: item.url
+    };
+  }).filter(item =>
+    Number.isFinite(item.id) &&
+    item.name &&
+    Number.isFinite(item.price) &&
+    item.image &&
+    item.url
+  );
+}
+
+document.getElementById("csvFile").addEventListener(
+  "change",
+  async function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const status = document.getElementById("csvStatus");
+
+    try {
+      const buffer = await file.arrayBuffer();
+      let text = new TextDecoder("utf-8").decode(buffer);;
+      const imported = parseCSV(text);
+
+      if (imported.length === 0) {
+        throw new Error("找不到有效的商品資料");
+      }
+
+      products = imported;
+
+      // 清空先前的抽選紀錄
+      pickedProducts.length = 0;
+
+      // 更新原本的商品卡片、轉盤和抽選紀錄
+      renderProducts();
+      drawWheel();
+      renderPickedProducts();
+
+      status.textContent =
+        `成功匯入 ${products.length} 件商品！`;
+    } catch (error) {
+      status.textContent = "匯入失敗：" + error.message;
+    }
+  }
+);
+
+    const productList = document.querySelector("#productList");
+    const total = document.querySelector("#total");
+
+    function renderProducts() {
+      productList.innerHTML = "";
+
+      products.forEach(product => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const img = document.createElement("img");
+        img.src = product.image;
+        img.alt = product.name;
+        img.loading = "lazy";
+
+        const name = document.createElement("h3");
+        name.textContent = product.name;
+
+        const price = document.createElement("p");
+        price.className = "price";
+        price.textContent =
+          "NT$" + product.price.toLocaleString("zh-TW");
+
+        const link = document.createElement("a");
+        link.href = product.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "查看商品頁 ↗";
+
+        card.append(img, name, price, link);
+        productList.appendChild(card);
+      });
+
+      total.textContent =
+        `目前共有 ${products.length} 件候選禮物`;
+    }
+
+    renderProducts();
+
+const canvas = document.querySelector("#wheel");
+const ctx = canvas.getContext("2d");
+
+const spinButton = document.querySelector("#spinButton");
+const result = document.querySelector("#result");
+const drawCountSelect = document.querySelector("#drawCount");
+const pickedList = document.querySelector("#pickedList");
+const pickedCount = document.querySelector("#pickedCount");
+const pickedTotal = document.querySelector("#pickedTotal");
+
+const colors = [
+  "#F5C6D6",
+  "#D9E7D5",
+  "#F6E7B4",
+  "#D7DDF4",
+  "#EADCF2",
+  "#F5D8C5",
+  "#CBE7E8",
+  "#F1D5E5"
+];
+
+// products：尚未抽中的商品
+// pickedProducts：已經抽中的商品
+const pickedProducts = [];
+
+let rotation = 0;
+let isSpinning = false;
+
+function drawWheel() {
+  const count = products.length;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (count === 0) {
+    ctx.beginPath();
+    ctx.arc(250, 250, 230, 0, Math.PI * 2);
+    ctx.fillStyle = "#f5e8ee";
+    ctx.fill();
+
+    ctx.fillStyle = "#8c526b";
+    ctx.font = "bold 22px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("禮物已抽完", 250, 250);
+    return;
+  }
+
+  const center = canvas.width / 2;
+  const radius = center - 10;
+  const slice = (Math.PI * 2) / count;
+
+  products.forEach((product, index) => {
+    const start =
+      -Math.PI / 2 + rotation + index * slice;
+    const end = start + slice;
+
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, start, end);
+    ctx.closePath();
+
+    ctx.fillStyle = colors[index % colors.length];
+    ctx.fill();
+
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(start + slice / 2);
+
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#443642";
+    ctx.font = "bold 15px sans-serif";
+
+    let label = product.name;
+    if (label.length > 10) {
+      label = label.slice(0, 9) + "…";
+    }
+
+    ctx.fillText(label, radius - 18, 0);
+    ctx.restore();
+  });
+
+  // 轉盤中央的裝飾圓點
+  ctx.beginPath();
+  ctx.arc(center, center, 9, 0, Math.PI * 2);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+}
+
+function getSelectedProduct() {
+  const slice = (Math.PI * 2) / products.length;
+
+  const angle =
+    (Math.PI * 2 - (rotation % (Math.PI * 2)))
+    % (Math.PI * 2);
+
+  let index = Math.floor(angle / slice);
+  index = Math.min(index, products.length - 1);
+
+  return products[index];
+}
+
+function renderPickedProducts() {
+  pickedList.innerHTML = "";
+
+  pickedProducts.forEach((product, index) => {
+    const card = document.createElement("article");
+    card.className = "picked-card";
+
+    const heading = document.createElement("h3");
+    heading.textContent =
+      `${index + 1}. ${product.name}`;
+
+    const price = document.createElement("p");
+    price.className = "picked-price";
+    price.textContent =
+      `NT$${product.price.toLocaleString("zh-TW")}`;
+
+    card.append(heading, price);
+    pickedList.appendChild(card);
+  });
+
+  if (pickedProducts.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "picked-empty";
+    empty.textContent = "還沒有抽中禮物，開始抽獎吧！";
+    pickedList.appendChild(empty);
+  }
+
+  const sum = pickedProducts.reduce(
+    (total, product) => total + product.price,
+    0
+  );
+
+  pickedCount.textContent =
+    `目前抽中 ${pickedProducts.length} 件`;
+
+  pickedTotal.textContent =
+    `累計金額：NT$${sum.toLocaleString("zh-TW")}`;
+}
+
+function updateDrawStatus() {
+  const target = Number(drawCountSelect.value);
+
+  if (pickedProducts.length >= target) {
+    spinButton.disabled = true;
+    result.textContent =
+      `🎉 已完成抽選！共抽中 ${target} 件禮物。`;
+    return;
+  }
+
+  if (products.length === 0) {
+    spinButton.disabled = true;
+    result.textContent = "候選禮物已全部抽完。";
+    return;
+  }
+
+  spinButton.disabled = false;
+}
+
+/* ===== 抽選動畫控制 ===== */
+
+const characterCompanion = document.getElementById("characterCompanion");
+const characterMessage = document.getElementById("characterMessage");
+const grandPrizeEffect = document.getElementById("grandPrizeEffect");
+const grandPrizeDetails = document.getElementById("grandPrizeDetails");
+const confettiLayer = document.getElementById("confettiLayer");
+
+const GRAND_PRIZE_THRESHOLD = 2000;
+
+// 開始抽選：角色緊張起來
+function startCharacterAnimation() {
+  characterCompanion.classList.remove("is-happy");
+  characterCompanion.classList.add("is-spinning");
+  characterMessage.textContent = "好緊張！會抽中什麼呢？";
+
+  grandPrizeEffect.classList.remove("is-active");
+  confettiLayer.replaceChildren();
+}
+
+// 抽中一般商品：角色開心跳躍
+function showNormalPrizeAnimation(product) {
+  characterCompanion.classList.remove("is-spinning");
+  characterCompanion.classList.add("is-happy");
+  characterMessage.textContent = "太棒了！抽到了！";
+
+  // 避免重複觸發時，舊的動畫狀態無法重新播放
+  setTimeout(() => {
+    characterCompanion.classList.remove("is-happy");
+  }, 1400);
+}
+
+// 抽中高金額商品：播放大獎演出
+function showGrandPrizeAnimation(product) {
+  characterCompanion.classList.remove("is-spinning");
+  characterCompanion.classList.add("is-happy");
+  characterMessage.textContent = "哇啊啊！大獎！";
+
+  // 安全地顯示商品名稱與價格
+  grandPrizeDetails.textContent =
+    `${product.name}｜NT$${Number(product.price).toLocaleString("zh-TW")}`;
+
+  // 清除前一次的彩帶
+  confettiLayer.replaceChildren();
+
+  // 產生彩帶
+  const confettiColors = [
+    "#FFD700", "#FFB6C1", "#FFFFFF",
+    "#F4A261", "#FFF176", "#E9C46A"
+  ];
+
+  for (let i = 0; i < 65; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.backgroundColor =
+      confettiColors[Math.floor(Math.random() * confettiColors.length)];
+    piece.style.animationDelay = `${Math.random() * 1.2}s`;
+    piece.style.animationDuration = `${2 + Math.random() * 1.5}s`;
+    confettiLayer.appendChild(piece);
+  }
+
+  // 重新套用動畫，確保每次抽中大獎都會播放
+  grandPrizeEffect.classList.remove("is-active");
+  void grandPrizeEffect.offsetWidth;
+  grandPrizeEffect.classList.add("is-active");
+
+  // 5 秒後收起大獎覆蓋層，保留抽選結果
+  setTimeout(() => {
+    grandPrizeEffect.classList.remove("is-active");
+  }, 5000);
+
+  // 動畫結束後恢復角色待機
+  setTimeout(() => {
+    characterCompanion.classList.remove("is-happy");
+    characterMessage.textContent = "下一份禮物會是什麼呢？";
+  }, 5000);
+}
+
+// 依照抽中商品的價格，決定一般動畫或大獎動畫
+function playPrizeAnimation(product) {
+  if (Number(product.price) >= GRAND_PRIZE_THRESHOLD) {
+    showGrandPrizeAnimation(product);
+  } else {
+    showNormalPrizeAnimation(product);
+  }
+}
+
+function spinWheel() {
+  const target = Number(drawCountSelect.value);
+
+  if (isSpinning || products.length === 0) return;
+
+  if (pickedProducts.length >= target) {
+    updateDrawStatus();
+    return;
+  }
+
+  isSpinning = true;
+  startCharacterAnimation();
+  document.getElementById("leftGif").classList.add("is-visible");
+  document.getElementById("rightGif").classList.add("is-visible");
+  spinButton.disabled = true;
+  result.textContent = "命運轉動中……";
+
+  const startRotation = rotation;
+  const extraRotation =
+    Math.PI * 2 * (5 + Math.random() * 3);
+
+  const targetRotation = startRotation + extraRotation;
+  const duration = 4000;
+  const startTime = performance.now();
+
+  function animate(now) {
+    const progress =
+      Math.min((now - startTime) / duration, 1);
+
+    // 讓轉盤逐漸減速
+    const eased = 1 - Math.pow(1 - progress, 4);
+
+    rotation =
+      startRotation
+      + (targetRotation - startRotation) * eased;
+
+    drawWheel();
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+      return;
+    }
+
+    rotation = rotation % (Math.PI * 2);
+
+    // 先依照目前轉盤位置決定抽中的商品
+    const selected = getSelectedProduct();
+
+    // 從候選清單移除，避免再次抽到
+    const selectedIndex = products.findIndex(
+      product => product.id === selected.id
+    );
+
+    if (selectedIndex !== -1) {
+      products.splice(selectedIndex, 1);
+    }
+
+    // 加入已抽中清單，保留先前結果
+    pickedProducts.push(selected);
+
+    // 更新候選商品卡片、轉盤及抽中清單
+    renderProducts();
+    drawWheel();
+    renderPickedProducts();
+
+    result.textContent =
+      `🎉 第 ${pickedProducts.length} 次抽中：${selected.name}（NT$${selected.price.toLocaleString("zh-TW")}）`;
+
+    isSpinning = false;
+    updateDrawStatus();
+    document.getElementById("leftGif").classList.remove("is-visible");
+    document.getElementById("rightGif").classList.remove("is-visible");
+    playPrizeAnimation(selected);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+spinButton.addEventListener("click", spinWheel);
+
+drawCountSelect.addEventListener("change", () => {
+  updateDrawStatus();
+});
+
+renderPickedProducts();
+drawWheel();
+updateDrawStatus();
+
+const resetButton = document.getElementById("resetButton");
+
+resetButton.addEventListener("click", () => {
+  // 如果轉盤正在旋轉，不允許中途重置
+  if (isSpinning) {
+    alert("請等抽選動畫結束後再重置。");
+    return;
+  }
+
+  // 將已抽中的商品全部放回候選清單
+  products.push(...pickedProducts);
+  pickedProducts.length = 0;
+
+  // 重置轉盤角度
+  rotation = 0;
+
+  // 清除動畫狀態
+  document.getElementById("leftGif").classList.remove("is-visible");
+  document.getElementById("rightGif").classList.remove("is-visible");
+  characterCompanion.classList.remove("is-spinning");
+  grandPrizeEffect.classList.remove("is-active");
+
+  // 恢復角色文字
+  characterMessage.textContent = "會抽中什麼呢？";
+
+  // 清除上一輪抽選結果
+  result.textContent = "等待命運揭曉……";
+
+  // 重新顯示商品、轉盤及抽中清單
+  renderProducts();
+  drawWheel();
+  renderPickedProducts();
+  updateDrawStatus();
+});
+
+  </script>
+</body>
+</html>
